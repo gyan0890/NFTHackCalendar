@@ -3,6 +3,21 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:300,400,700);
 @import url(https://fonts.googleapis.com/icon?family=Material+Icons);
 
+$white: #fff;
+$gray: #bbb;
+$black: #111;
+$general: #727272;
+$black_soft: #333;
+$black_col: #2e333c;
+$black_more: #0f0f0f;
+$color: #8364E2;
+$color_more: #403f83;
+.col-white{
+  color: $white;
+}
+
+
+
 .icon {
     font-family: "Material Icons", serif;
     font-style: normal;
@@ -158,7 +173,7 @@ main {
 
 .calendar .body .cell {
     position: relative;
-    height: 5em;
+    
     border-right: 1px solid var(--border-color);
     overflow: hidden;
     cursor: pointer;
@@ -226,4 +241,86 @@ main {
     flex-grow: 0;
     flex-basis: calc(100% / 7);
     width: calc(100% / 7);
+}
+
+.nft__item_wrap {
+    width: 100%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+.nft__item_wrap span {
+    display: block;
+    width: 100%;
+}
+.nft__item img {
+    width: 100%;
+    height: auto !important;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+
+.nft__item {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    padding: 20px;
+    margin: 10px;
+    border: solid 1px #ddd;
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    margin-bottom: 25px;
+    background: #ffffff;
+    transition: .7s;
+    &:hover{
+      box-shadow: 2px 2px 30px 0px rgba(10, 10, 10, 0.1);
+      transition: .7s;
+    }
+}
+.nft__item_info{
+  cursor: pointer;
+  line-height: 28px;
+  margin-bottom: -22px;
+}
+.nft__item h4 {
+    font-weight: 800;
+    font-size: 15px;
+    margin-bottom: 5px;
+}
+.nft__item_price {
+    font-size: 14px;
+    font-weight: 600;
+    display: block;
+}
+.nft__item_price span {
+    margin-left: 10px;
+    color: $black;
+    font-weight: 700;
+}
+.nft__item_action {
+    font-size: 14px;
+    span{
+      font-weight: bold;
+      color: $color;
+    }
+}
+.nft__item_like {
+    position: relative;
+    bottom: 22px;
+    font-size: 14px;
+    color: #ddd;
+    float: right;
+    span {
+      color: $gray;
+      margin-left: 5px;
+      font-size: 12px;
+    }
+    &:hover i {
+    color: pink;
+    }
 }
