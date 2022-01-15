@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as dateFns from 'date-fns';
 import "../styles/calendar.scss"
-function Calendar() {
-
+import PinataService from '../services/pinataservice';
+function Calendar(props) {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [nfts, setNfts] = useState([]);
+    useEffect(async () => {
+        try {
+            const data = await PinataService.getPinataStorage();
+            debugger;
+        } catch (error) {
+            debugger
+        }
+    }, [])
     const renderHeader = () => {
 
         const dateFormat = "MMM-yy";
@@ -66,38 +75,38 @@ function Calendar() {
                         key={day}
                         onClick={() => { onDateClick(cloneDay) }}
                     >
-{dateFns.isSameMonth(day, monthStart) && 
-                        <div className="col-lg-3 col-sm-6 col-xs-12">
+                        {dateFns.isSameMonth(day, monthStart) &&
+                            <div className="col-lg-3 col-sm-6 col-xs-12">
 
-                            <div className="nft__item m-0">
+                                <div className="nft__item m-0">
 
-                                <div className="nft__item_wrap">
-                                    <span>
-                                        <img  height="400" src={require('../img/stock.jpg')} />
-                                    </span>
-                                </div>
-
-                                <div className="nft__item_info">
-                                    <span >
-                                        <h4>asdfasf</h4>
-                                    </span>
-                                    <div className="nft__item_price">
-                                        2 ETH<span>1/20</span>
+                                    <div className="nft__item_wrap">
+                                        <span>
+                                            <img height="400" src={require('../img/stock.jpg')} />
+                                        </span>
                                     </div>
-                                    <div className="nft__item_action">
-                                        <span>Place a bid</span>
-                                    </div>
-                                    <div className="nft__item_like">
-                                        <i className="fa fa-heart"></i><span>50</span>
-                                        <span className="number">{formattedDate}</span>
-                                        <span className="bg">{formattedDate}</span>
+
+                                    <div className="nft__item_info">
+                                        <span >
+                                            <h4>asdfasf</h4>
+                                        </span>
+                                        <div className="nft__item_price">
+                                            2 ETH<span>1/20</span>
+                                        </div>
+                                        <div className="nft__item_action">
+                                            <span>Place a bid</span>
+                                        </div>
+                                        <div className="nft__item_like">
+                                            <i className="fa fa-heart"></i><span>50</span>
+                                            <span className="number">{formattedDate}</span>
+                                            <span className="bg">{formattedDate}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-            }
-<span className="number">{formattedDate}</span>
-                                        <span className="bg">{formattedDate}</span>
+                        }
+                        <span className="number">{formattedDate}</span>
+                        <span className="bg">{formattedDate}</span>
 
                     </div>
                 );
