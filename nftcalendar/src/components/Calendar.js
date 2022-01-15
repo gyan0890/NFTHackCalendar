@@ -66,13 +66,17 @@ function Calendar() {
                         key={day}
                         onClick={() => { onDateClick(cloneDay) }}
                     >
-
+{dateFns.isSameMonth(day, monthStart) && 
                         <div className="col-lg-3 col-sm-6 col-xs-12">
-                            
+
                             <div className="nft__item m-0">
-                                
-                                
-                                
+
+                                <div className="nft__item_wrap">
+                                    <span>
+                                        <img  height="400" src={require('../img/stock.jpg')} />
+                                    </span>
+                                </div>
+
                                 <div className="nft__item_info">
                                     <span >
                                         <h4>asdfasf</h4>
@@ -86,12 +90,15 @@ function Calendar() {
                                     <div className="nft__item_like">
                                         <i className="fa fa-heart"></i><span>50</span>
                                         <span className="number">{formattedDate}</span>
-                        <span className="bg">{formattedDate}</span>
+                                        <span className="bg">{formattedDate}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+            }
+<span className="number">{formattedDate}</span>
+                                        <span className="bg">{formattedDate}</span>
+
                     </div>
                 );
                 day = dateFns.addDays(day, 1);
