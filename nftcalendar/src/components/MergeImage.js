@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as dateFns from 'date-fns';
-import "../styles/calendar.scss"
-function Calendar() {
+import "../styles/calendar.css"
+function MergeImage() {
 
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -66,32 +66,8 @@ function Calendar() {
                         key={day}
                         onClick={() => { onDateClick(cloneDay) }}
                     >
-
-                        <div className="col-lg-3 col-sm-6 col-xs-12">
-                            
-                            <div className="nft__item m-0">
-                                
-                                
-                                
-                                <div className="nft__item_info">
-                                    <span >
-                                        <h4>asdfasf</h4>
-                                    </span>
-                                    <div className="nft__item_price">
-                                        2 ETH<span>1/20</span>
-                                    </div>
-                                    <div className="nft__item_action">
-                                        <span>Place a bid</span>
-                                    </div>
-                                    <div className="nft__item_like">
-                                        <i className="fa fa-heart"></i><span>50</span>
-                                        <span className="number">{formattedDate}</span>
+                        <span className="number">{formattedDate}</span>
                         <span className="bg">{formattedDate}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
                     </div>
                 );
                 day = dateFns.addDays(day, 1);
