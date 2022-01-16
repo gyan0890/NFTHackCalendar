@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as dateFns from 'date-fns';
 import SalePopUp from "./SalePopup";
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Container } from 'react-bootstrap';
 import ContractService from "../services/contractservice";
 import * as _ from 'lodash';
 import "../styles/calendar.scss"
@@ -21,6 +21,8 @@ function Calendar(props) {
         try {
             if (wallet) {
                 const data = await PinataService.getPinataStorage();
+                const month = dateFns.getMonth(currentMonth);
+                debugger;
                 setCurrentMonth(dateFns.addMonths(currentMonth, 1))
 
                 const contranctdata = await ContractService.getAllNFT(wallet);
@@ -195,11 +197,13 @@ function Calendar(props) {
         setCurrentMonth(dateFns.subMonths(currentMonth, 1));
     }
     return (
-        <div className="calendar">
-            {renderHeader()}
-            {renderDays()}
-            {renderCells()}
-        </div>
+        <Container>
+            <div className="calendar">
+                {renderHeader()}
+                {renderDays()}
+                {renderCells()}
+            </div>
+        </Container>
     );
 }
 
