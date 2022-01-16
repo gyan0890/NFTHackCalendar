@@ -10,15 +10,21 @@ import * as _ from 'lodash';
 import PinataService from '../services/pinataservice';
 // import { Card, Button } from 'react-bootstrap';
 function MyNft(props) {
-    const [wallet, setwallet] = useState(null)
+    const [wallet, setwallet] = useState(null);
+    const [nfts, setNFTS] = useState([])
+
     useEffect(async () => {
         if (wallet) {
             const data = await PinataService.getPinataStorage();
 
 
             let contranctdata = await ContractService.getAllNFT(wallet);
-            contranctdata = contranctdata.filter(d => d.tokenOwner == wallet);
-            debugger;
+            contranctdata = contranctdata.filter(d => {
+                console.log(d.tokenOwner);
+                if (d.tokenId == 4 || d.tokenId == 0) {
+                    return d;
+                }
+            });
             const filteredNFTS = [];
             contranctdata.forEach(elm => {
                 const tokenhash = elm.tokenURI.split("/")[4];
@@ -30,13 +36,13 @@ function MyNft(props) {
                     }
                 }
             });
+            setNFTS(filteredNFTS);
         }
     }, [wallet])
 
     const renderbody = (data) => {
 
         if (props.wallet && props.wallet[0] && !wallet) {
-            debugger;
             setwallet(props.wallet[0]);
         }
         return (<Card style={{ width: '18rem' }}>
@@ -47,15 +53,12 @@ function MyNft(props) {
                     Some quick example text to build on the card title and make up the bulk of
                     the card's content.
                 </Card.Text>
-                <div className='fl'>
-                    <Button variant="primary m-1">Personalize</Button>
-                    <Button variant="primary m-1">Set Sale</Button>
-                </div>
+                <Button variant="primary">Go somewhere</Button>
             </Card.Body>
-        </Card>)
+        </Card>);
     }
     return (
-        <>{renderbody()}</>
+        <>{nfts.map(d => renderbody(d))}</>
 
     );
 }
