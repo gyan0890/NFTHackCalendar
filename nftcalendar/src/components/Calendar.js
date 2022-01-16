@@ -8,7 +8,7 @@ import "../styles/calendar.scss"
 import PinataService from '../services/pinataservice';
 function Calendar(props) {
     const [selectedDate, setSelectedDate] = useState(new Date());
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+    const [currentMonth, setCurrentMonth] = useState(new Date("2/2/2022"));
     const [nfts, setNfts] = useState([]);
     const [show, setShow] = useState(false);
     const [contractnfts, setContractNFTS] = useState([])
@@ -21,8 +21,7 @@ function Calendar(props) {
         try {
             if (wallet) {
                 const data = await PinataService.getPinataStorage();
-                const month = dateFns.getMonth(currentMonth);
-                setCurrentMonth(dateFns.addMonths(currentMonth, 1))
+
 
                 const contranctdata = await ContractService.getAllNFT(wallet);
                 const filteredNFTS = [];

@@ -1,4 +1,5 @@
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import Calendar from './components/Calendar';
 import { useContext, useEffect, useState } from 'react';
 import WalletService from './services/wallet';
@@ -32,7 +33,7 @@ function App() {
           <Calendar wallet={walletd} />
         </div>
         <div label="My NFT">
-          <MyNft></MyNft>
+          <MyNft wallet={walletd}></MyNft>
         </div>
         <div label="Profile">
           Nothing to see here, this tab is <em>extinct</em>!
