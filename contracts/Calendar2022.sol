@@ -10,7 +10,7 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
 
     //Set it to 366 for 2022
     uint constant MAX_DATES = 1;
-    bool mintActive = false;
+    bool public mintActive = false;
 
     address platform;
     address advisor;
@@ -18,15 +18,17 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     struct NFTData {
         uint tokenId;
         string tokenURI;
-
-        //Q to Vkas: Can we add these to the tokenURI?
-        // string month;
-        // uint8 day;
     }
 
     NFTData[] nftData;
     mapping(uint => uint) nftPrice;
     mapping(uint => NFTData) nftTokenMap;
+
+    event Minted(address owner, uint numTokens);
+    event SetForSale(uint tokenId, uint price);
+    event TokenMetadatUpdated(uint tokenId, string updatedTokenURI);
+    event Sold(uint tokenId, uint salePrice);
+    event OwnershipGranted(address newOwner);
 
     modifier onlyTokenOwner(uint tokenId) {
         require(msg.sender == ownerOf(tokenId), "Only token owner can call this function");
@@ -48,11 +50,11 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         Mint 366 NFTs for the year 2022.
         @dev: Only the onwer can mint
     */
-    function mintAndSellDates(string[] memory tokenURI) public onlyOwner {
+    function mintDates(string[] memory tokenURI) public onlyOwner {
         require(mintActive, "The NFTs have already been minted");
         require(tokenURI.length >= MAX_DATES, "Token URI missing");
         for(uint i = 0; i < MAX_DATES; i++) {
-            uint mintIndex = i;
+             uint mintIndex = i;
             _safeMint(msg.sender, mintIndex);
             _setTokenURI(mintIndex, tokenURI[i]);
             
@@ -62,6 +64,7 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         }
 
         mintActive = false;
+        emit Minted(msg.sender, MAX_DATES);
         
     }
 
@@ -71,6 +74,8 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     function setSale(uint tokenId, uint price) public onlyTokenOwner(tokenId){
         require(price > 0, "Price cannot be set to zero");
         nftPrice[tokenId] = price;
+
+        emit SetForSale(tokenId, price);
     }
 
     /*
@@ -81,6 +86,7 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         _setTokenURI(tokenId, updatedTokenURI);
         nftUpdated.tokenURI = updatedTokenURI;
 
+        emit TokenMetadatUpdated(tokenId, updatedTokenURI);
     }
 
     /*
@@ -105,6 +111,18 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         payable(platform).transfer(platformFee);
         payable(advisor).transfer(advisorFee);
 
+        emit Sold(tokenId, msg.value);
+
+    }
+
+    /**
+    * @dev Owner can transfer the ownership of the contract to a new account (`_grantedOwner`).
+    * Can only be called by the current owner.
+    */
+    function grantContractOwnership(address newOwner) public virtual onlyOwner {
+        require(newOwner != address(0), "New owner cannot be zero address");
+        _transferOwnership(newOwner);
+        emit OwnershipGranted(newOwner);
     }
 
     /*
