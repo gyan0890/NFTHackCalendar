@@ -11,6 +11,13 @@ import PinataService from '../services/pinataservice';
 // import { Card, Button } from 'react-bootstrap';
 function MyNft(props) {
     const [wallet, setwallet] = useState(null)
+
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+
     useEffect(async () => {
         if (wallet) {
             const data = await PinataService.getPinataStorage();
@@ -48,9 +55,44 @@ function MyNft(props) {
                     the card's content.
                 </Card.Text>
                 <div className='fl'>
-                    <Button variant="primary m-1">Personalize</Button>
+                    <Button variant="primary m-1" onClick={handleShow}>Personalize</Button>
                     <Button variant="primary m-1">Set Sale</Button>
                 </div>
+
+                <Modal show={show} onHide={handleClose}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Personalize</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+
+                        <form>
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Title</label>
+                                <input type="text" class="form-control" id="exampleInputEmail1" placeholder="Title" />
+
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Description</label>
+                                <input type="text" class="form-control" id="exampleInputPassword1" placeholder="Description" />
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleFormControlFile1">Upload customized image</label>
+                                <input type="file" class="form-control-file" id="exampleFormControlFile1" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+
+                    </Modal.Body>
+                    {/* <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Close
+                        </Button>
+                        <Button variant="primary" onClick={handleClose}>
+                            Save Changes
+                        </Button>
+                    </Modal.Footer> */}
+                </Modal>
             </Card.Body>
         </Card>)
     }
