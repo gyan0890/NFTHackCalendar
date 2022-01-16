@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import * as dateFns from 'date-fns';
+
+import * as _ from 'lodash';
 import "../styles/calendar.scss"
 import PinataService from '../services/pinataservice';
 function Calendar(props) {
@@ -9,11 +11,28 @@ function Calendar(props) {
     useEffect(async () => {
         try {
             const data = await PinataService.getPinataStorage();
-            debugger;
+            setCurrentMonth(dateFns.addMonths(currentMonth,1))
+            const pinatanfts = formatDataInMap(data.data.rows);
         } catch (error) {
-            debugger
+            console.error('something went wrong getting from pinata')
         }
     }, [])
+
+    const formatDataInMap = (data) => {
+        const map = {};
+        const transformed = {};
+        data.forEach(d => {
+            const kv = d.metadata.keyvalues
+            const fdate = new Date(kv.date + "/" + kv.month + "/" + kv.year);
+            map[fdate] = d;
+        })
+        const keys = Object.keys(map)
+            .sort((d1, d2) => new Date(d1.date).getTime() - new Date(d2.date).getTime())
+            .forEach(d => {
+                transformed[d] = map[d];
+            })
+        setNfts(transformed)
+    }
     const renderHeader = () => {
 
         const dateFormat = "MMM-yy";
@@ -54,7 +73,7 @@ function Calendar(props) {
         const monthEnd = dateFns.endOfMonth(monthStart);
         const startDate = dateFns.startOfWeek(monthStart);
         const endDate = dateFns.endOfWeek(monthEnd);
-
+        const pinataurl = "https://gateway.pinata.cloud/ipfs/";
         const dateFormat = "d";
         const rows = [];
 
@@ -66,6 +85,11 @@ function Calendar(props) {
             for (let i = 0; i < 7; i++) {
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
+                const meta = nfts[day];
+                let imageurl = require('../img/stock.jpg');
+                if (meta) {
+                    imageurl = pinataurl + meta.metadata.keyvalues.imageHash;
+                }
                 days.push(
                     <div
                         className={`col cell ${!dateFns.isSameMonth(day, monthStart)
@@ -82,13 +106,13 @@ function Calendar(props) {
 
                                     <div className="nft__item_wrap">
                                         <span>
-                                            <img height="400" src={require('../img/stock.jpg')} />
+                                            <img height="400" src={imageurl} />
                                         </span>
                                     </div>
 
                                     <div className="nft__item_info">
                                         <span >
-                                            <h4>asdfasf</h4>
+                                            <h4>{meta ? meta.metadata.keyvalues.name : "NA"}</h4>
                                         </span>
                                         <div className="nft__item_price">
                                             2 ETH<span>1/20</span>
