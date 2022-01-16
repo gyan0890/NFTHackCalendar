@@ -5,6 +5,9 @@ import WalletService from './services/wallet';
 import { AppContext, AppContextProvider } from './states/appcontext';
 import { AppActions } from './states/actions';
 import Tabs from "./components/Tabs";
+import MergeImage from "./components/MergeImage";
+import { compact } from 'lodash';
+
 function App() {
 
   const [state, dispatch] = useContext(AppContext);
@@ -35,6 +38,9 @@ function App() {
         </div>
         <div label="Profile">
           Nothing to see here, this tab is <em>extinct</em>!
+        </div>
+        <div label="Merge">
+          <MergeImage />
         </div>
       </Tabs>
     </div>

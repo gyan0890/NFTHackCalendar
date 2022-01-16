@@ -10,11 +10,11 @@ function Calendar(props) {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [nfts, setNfts] = useState([]);
-    const [show, setShow] = useState(false);
+    //const [show, setShow] = useState(false);
     const [contractnfts, setContractNFTS] = useState([])
     const [wallet, setwallet] = useState(null);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    // const handleClose = () => setShow(false);
+    // const handleShow = () => setShow(true);
 
 
     useEffect(async () => {
@@ -22,15 +22,18 @@ function Calendar(props) {
             if (wallet) {
                 const data = await PinataService.getPinataStorage();
                 setCurrentMonth(dateFns.addMonths(currentMonth, 1))
-
+debugger;
                 const contranctdata = await ContractService.getAllNFT(wallet);
                 const filteredNFTS = [];
+
+            
                 contranctdata.forEach(elm => {
                     const tokenhash = elm.tokenURI.split("/")[4];
                     if (tokenhash) {
                         const filtered = data.data.rows.filter(d => d.ipfs_pin_hash == tokenhash);
                         if (filtered && filtered.length > 0) {
                             filtered[0].contrancttokenid = elm.tokenId;
+                            filtered[0].price = elm.price;
                             filteredNFTS.push(filtered[0]);
                         }
                     }
@@ -127,8 +130,8 @@ function Calendar(props) {
                 const meta = nfts[day];
                 let imageurl = require('../img/stock.jpg');
                 if (meta) {
-                    debugger;
-                    // imageurl = pinataurl + meta.metadata.keyvalues.imageHash;
+                  
+                    imageurl = meta.metadata.keyvalues.imageHash;
                 }
                 days.push(
                     <div
@@ -152,13 +155,13 @@ function Calendar(props) {
 
                                     <div className="nft__item_info">
                                         <span >
-                                            <h4>{meta ? meta.metadata.keyvalues.name : "NA"}</h4>
+                                            <h4>{meta ? meta.metadata.name : "NA"}</h4>
                                         </span>
                                         <div className="nft__item_price">
-                                            2 ETH
+                                        {meta ? meta.price : "NA"}
                                         </div>
-                                        <div className="nft__item_action" >
-                                            <button onClick={() => onBuy(meta.contrancttokenid)}>Buy</button>
+                                        <div className="nft__item_action " >
+                                            <button className = "button-9" onClick={() => onBuy(meta.contrancttokenid)}>Buy</button>
                                         </div>
 
 
