@@ -19,18 +19,28 @@ function Calendar(props) {
 
     useEffect(async () => {
         try {
-            if (nfts.length <= 0) {
-                // const data = await PinataService.getPinataStorage();
-                // setCurrentMonth(dateFns.addMonths(currentMonth, 1))
-                // const pinatanfts = formatDataInMap(data.data.rows);
-            }
             if (wallet) {
+                const data = await PinataService.getPinataStorage();
+                setCurrentMonth(dateFns.addMonths(currentMonth, 1))
+
+                const contranctdata = await ContractService.getAllNFT(wallet);
+                const filteredNFTS = [];
+                contranctdata.forEach(elm => {
+                    const tokenhash = elm.tokenURI.split("/")[4];
+                    if (tokenhash) {
+                        const filtered = data.data.rows.filter(d => d.ipfs_pin_hash == tokenhash);
+                        if (filtered && filtered.length > 0) {
+                            filtered[0].contrancttokenid = elm.tokenId;
+                            filteredNFTS.push(filtered[0]);
+                        }
+                    }
+                });
+                const pinatanfts = formatDataInMap(filteredNFTS);
                 debugger;
-                const data = await ContractService.getAllNFT(wallet)
+                setNfts(pinatanfts);
             }
         } catch (error) {
-            debugger;
-            console.error('something went wrong getting from pinata')
+            console.error(error)
         }
     }, [wallet])
 
@@ -48,9 +58,11 @@ function Calendar(props) {
             .forEach(d => {
                 transformed[d] = map[d];
             })
-        setNfts(transformed)
+        return transformed;
     }
-
+    const onBuy = (tokenid) => {
+        alert(tokenid)
+    }
 
     const renderHeader = () => {
         if (props.wallet && props.wallet[0] && !wallet) {
@@ -109,7 +121,8 @@ function Calendar(props) {
                 const meta = nfts[day];
                 let imageurl = require('../img/stock.jpg');
                 if (meta) {
-                    imageurl = pinataurl + meta.metadata.keyvalues.imageHash;
+                    debugger;
+                    // imageurl = pinataurl + meta.metadata.keyvalues.imageHash;
                 }
                 days.push(
                     <div
@@ -139,7 +152,7 @@ function Calendar(props) {
                                             2 ETH
                                         </div>
                                         <div className="nft__item_action" >
-                                            <button onClick={handleShow}>Buy</button>
+                                            <button onClick={() => onBuy(meta.contrancttokenid)}>Buy</button>
                                         </div>
 
 
