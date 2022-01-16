@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as dateFns from 'date-fns';
 import SalePopUp from "./SalePopup";
 import { Modal, Button } from 'react-bootstrap';
-
+import ContractService from "../services/contractservice";
 import * as _ from 'lodash';
 import "../styles/calendar.scss"
 import PinataService from '../services/pinataservice';
@@ -11,20 +11,29 @@ function Calendar(props) {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [nfts, setNfts] = useState([]);
     const [show, setShow] = useState(false);
-
+    const [contractnfts, setContractNFTS] = useState([])
+    const [wallet, setwallet] = useState(null);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
 
 
     useEffect(async () => {
         try {
-            const data = await PinataService.getPinataStorage();
-            setCurrentMonth(dateFns.addMonths(currentMonth, 1))
-            const pinatanfts = formatDataInMap(data.data.rows);
+            if (nfts.length <= 0) {
+                // const data = await PinataService.getPinataStorage();
+                // setCurrentMonth(dateFns.addMonths(currentMonth, 1))
+                // const pinatanfts = formatDataInMap(data.data.rows);
+            }
+            if (wallet) {
+                debugger;
+                const data = await ContractService.getAllNFT(wallet)
+            }
         } catch (error) {
+            debugger;
             console.error('something went wrong getting from pinata')
         }
-    }, [])
+    }, [wallet])
+
 
     const formatDataInMap = (data) => {
         const map = {};
@@ -44,7 +53,9 @@ function Calendar(props) {
 
 
     const renderHeader = () => {
-
+        if (props.wallet && props.wallet[0] && !wallet) {
+            setwallet(props.wallet[0]);
+        }
         const dateFormat = "MMM-yy";
         return (
             <div className="header row flex-middle">
@@ -131,31 +142,17 @@ function Calendar(props) {
                                             <button onClick={handleShow}>Buy</button>
                                         </div>
 
-                                        {/* <Modal show={show} onHide={handleClose}>
-                                            <Modal.Header closeButton>
-                                                <Modal.Title>Modal heading</Modal.Title>
-                                            </Modal.Header>
-                                            <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-                                            <Modal.Footer>
-                                                <Button variant="secondary" onClick={handleClose}>
-                                                    Close
-                                                </Button>
-                                                <Button variant="primary" onClick={handleClose}>
-                                                    Save Changes
-                                                </Button>
-                                            </Modal.Footer>
-                                        </Modal> */}
+
 
                                         <div className="nft__item_like">
                                             {/* <i className="fa fa-heart"></i><span>50</span>*/}
-                                            <span className="number">{formattedDate}</span> 
+                                            <span className="number">{formattedDate}</span>
                                             <span className="bg">{formattedDate}</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         }
-                       
 
                     </div>
                 );
