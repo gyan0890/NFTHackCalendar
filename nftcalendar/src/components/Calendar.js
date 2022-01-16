@@ -1,21 +1,61 @@
 import React, { useEffect, useState } from 'react';
 import * as dateFns from 'date-fns';
+import SalePopUp from "./SalePopup";
+import { Modal, Button } from 'react-bootstrap';
+import ContractService from "../services/contractservice";
+import * as _ from 'lodash';
 import "../styles/calendar.scss"
 import PinataService from '../services/pinataservice';
 function Calendar(props) {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [nfts, setNfts] = useState([]);
+    const [show, setShow] = useState(false);
+    const [contractnfts, setContractNFTS] = useState([])
+    const [wallet, setwallet] = useState(null);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+
     useEffect(async () => {
         try {
-            const data = await PinataService.getPinataStorage();
-            debugger;
+            if (nfts.length <= 0) {
+                // const data = await PinataService.getPinataStorage();
+                // setCurrentMonth(dateFns.addMonths(currentMonth, 1))
+                // const pinatanfts = formatDataInMap(data.data.rows);
+            }
+            if (wallet) {
+                debugger;
+                const data = await ContractService.getAllNFT(wallet)
+            }
         } catch (error) {
-            debugger
+            debugger;
+            console.error('something went wrong getting from pinata')
         }
-    }, [])
-    const renderHeader = () => {
+    }, [wallet])
 
+
+    const formatDataInMap = (data) => {
+        const map = {};
+        const transformed = {};
+        data.forEach(d => {
+            const kv = d.metadata.keyvalues
+            const fdate = new Date(kv.date + "/" + kv.month + "/" + kv.year);
+            map[fdate] = d;
+        })
+        const keys = Object.keys(map)
+            .sort((d1, d2) => new Date(d1.date).getTime() - new Date(d2.date).getTime())
+            .forEach(d => {
+                transformed[d] = map[d];
+            })
+        setNfts(transformed)
+    }
+
+
+    const renderHeader = () => {
+        if (props.wallet && props.wallet[0] && !wallet) {
+            setwallet(props.wallet[0]);
+        }
         const dateFormat = "MMM-yy";
         return (
             <div className="header row flex-middle">
@@ -54,7 +94,7 @@ function Calendar(props) {
         const monthEnd = dateFns.endOfMonth(monthStart);
         const startDate = dateFns.startOfWeek(monthStart);
         const endDate = dateFns.endOfWeek(monthEnd);
-
+        const pinataurl = "https://gateway.pinata.cloud/ipfs/";
         const dateFormat = "d";
         const rows = [];
 
@@ -66,6 +106,11 @@ function Calendar(props) {
             for (let i = 0; i < 7; i++) {
                 formattedDate = dateFns.format(day, dateFormat);
                 const cloneDay = day;
+                const meta = nfts[day];
+                let imageurl = require('../img/stock.jpg');
+                if (meta) {
+                    imageurl = pinataurl + meta.metadata.keyvalues.imageHash;
+                }
                 days.push(
                     <div
                         className={`col cell ${!dateFns.isSameMonth(day, monthStart)
@@ -82,22 +127,25 @@ function Calendar(props) {
 
                                     <div className="nft__item_wrap">
                                         <span>
-                                            <img height="400" src={require('../img/stock.jpg')} />
+                                            <img height="400" src={imageurl} />
                                         </span>
                                     </div>
 
                                     <div className="nft__item_info">
                                         <span >
-                                            <h4>asdfasf</h4>
+                                            <h4>{meta ? meta.metadata.keyvalues.name : "NA"}</h4>
                                         </span>
                                         <div className="nft__item_price">
-                                            2 ETH<span>1/20</span>
+                                            2 ETH
                                         </div>
-                                        <div className="nft__item_action">
-                                            <span>Place a bid</span>
+                                        <div className="nft__item_action" >
+                                            <button onClick={handleShow}>Buy</button>
                                         </div>
+
+
+
                                         <div className="nft__item_like">
-                                            <i className="fa fa-heart"></i><span>50</span>
+                                            {/* <i className="fa fa-heart"></i><span>50</span>*/}
                                             <span className="number">{formattedDate}</span>
                                             <span className="bg">{formattedDate}</span>
                                         </div>
@@ -105,8 +153,6 @@ function Calendar(props) {
                                 </div>
                             </div>
                         }
-                        <span className="number">{formattedDate}</span>
-                        <span className="bg">{formattedDate}</span>
 
                     </div>
                 );
