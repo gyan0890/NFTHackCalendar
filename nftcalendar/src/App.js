@@ -5,6 +5,7 @@ import WalletService from './services/wallet';
 import { AppContext, AppContextProvider } from './states/appcontext';
 import { AppActions } from './states/actions';
 import Tabs from "./components/Tabs";
+import MyNft from './components/Mynft';
 function App() {
 
   const [state, dispatch] = useContext(AppContext);
@@ -31,7 +32,7 @@ function App() {
           <Calendar wallet={walletd} />
         </div>
         <div label="My NFT">
-          After 'while, <em>Crocodile</em>!
+          <MyNft></MyNft>
         </div>
         <div label="Profile">
           Nothing to see here, this tab is <em>extinct</em>!

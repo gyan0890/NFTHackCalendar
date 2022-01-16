@@ -22,7 +22,6 @@ function Calendar(props) {
             if (wallet) {
                 const data = await PinataService.getPinataStorage();
                 const month = dateFns.getMonth(currentMonth);
-                debugger;
                 setCurrentMonth(dateFns.addMonths(currentMonth, 1))
 
                 const contranctdata = await ContractService.getAllNFT(wallet);
