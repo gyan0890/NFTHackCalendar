@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 //tuple(uint256,string)[]: 0,https://gateway.pinata.cloud/ipfs/QmUM2jvm9Ya795JoQMMc652tZgPiygPwfPrUpDmqbN4d6K
-
+//Floor Price: 1000000000000000000
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -11,7 +11,7 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     string baseURI;
 
     //Set it to 366 for 2022
-    uint constant MAX_DATES = 1;
+    uint constant MAX_DATES = 28;
     bool public mintActive = false;
 
     address platform;
@@ -20,6 +20,9 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     struct NFTData {
         uint tokenId;
         string tokenURI;
+        uint price;
+        address tokenOwner;
+        bool locked;
     }
 
     NFTData[] nftData;
@@ -61,7 +64,7 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         Mint 366 NFTs for the year 2022.
         @dev: Only the onwer can mint
     */
-    function mintDates(string[] memory tokenMetadata) public onlyOwner {
+    function mintDates(string[] memory tokenMetadata, uint floorPrice) public onlyOwner {
         require(mintActive, "The NFTs have already been minted");
         require(tokenMetadata.length >= MAX_DATES, "Token URI missing");
         for(uint i = 0; i < MAX_DATES; i++) {
@@ -69,8 +72,9 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
             _safeMint(msg.sender, mintIndex);
             _setTokenURI(mintIndex, tokenMetadata[i]);
             
-            NFTData memory nft = NFTData(mintIndex, tokenURI(i));
+            NFTData memory nft = NFTData(mintIndex, tokenURI(i), floorPrice, msg.sender, false);
             nftTokenMap[mintIndex] = nft;
+            nftPrice[mintIndex] = floorPrice;
             nftData.push(nft);
         }
 
@@ -92,11 +96,11 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     /*
         Update the token metadata by settng the new token URI.
     */
-    function updateTokenURI(uint tokenId, string memory updatedTokenURI) public onlyTokenOwner(tokenId){
+    function updateTokenURI(uint tokenId, string memory updatedTokenURI, bool isLocked) public onlyTokenOwner(tokenId){
         NFTData storage nftUpdated = nftTokenMap[tokenId];
         _setTokenURI(tokenId, updatedTokenURI);
         nftUpdated.tokenURI = updatedTokenURI;
-
+        nftUpdated.locked = isLocked;
         emit TokenMetadatUpdated(tokenId, updatedTokenURI);
     }
 
@@ -113,6 +117,11 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
 
         nftAddress.safeTransferFrom(tokenOwner, msg.sender, tokenId);
 
+        //Change the price back to 0
+        NFTData storage nftUpdated = nftTokenMap[tokenId];
+        nftUpdated.price = 0;
+        nftUpdated.tokenOwner = msg.sender;
+
         uint platformFee = (msg.value * 4)/100;
         uint advisorFee = (msg.value * 1)/100;
         uint sellerFee = (msg.value * 95) / 100;
@@ -124,6 +133,14 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
 
         emit Sold(tokenId, msg.value);
 
+    }
+
+    /*
+        Unlocks the locked NFT
+    */
+    function unLock(uint tokenId) public onlyTokenOwner(tokenId){
+        NFTData storage nftUpdated = nftTokenMap[tokenId];
+        nftUpdated.locked = false;
     }
 
     /**
