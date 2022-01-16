@@ -1,101 +1,52 @@
-import React, { useState } from 'react';
+import React, { Component, useState } from 'react';
 import * as dateFns from 'date-fns';
-import "../styles/calendar.css"
-function MergeImage() {
+import "../styles/calendar.scss";
 
-    const [selectedDate, setSelectedDate] = useState(new Date());
-    const [currentMonth, setCurrentMonth] = useState(new Date());
-    const renderHeader = () => {
+class MergeImage extends Component {
 
-        const dateFormat = "MMM-yy";
+    constructor() {
+        super();
+        this.state = {
+
+            // Initially, no file is selected
+            selectedFile: null,
+            b64content: ''
+        };
+    }
+
+
+    // On file select (from the pop up)
+    onFileChange = event => {
+
+        // Update the state
+        this.setState({ selectedFile: event.target.files[0] });
+
+        //can call the merge method, and set the b64content of merged media into state.  
+    };
+
+    // On file upload (click the upload button)
+    onFileUpload = () => { };
+
+    render() {
         return (
-            <div className="header row flex-middle">
-                <div className="col col-start">
-                    <div className="icon" onClick={prevMonth}>
-                        chevron_left
+            <div className="container">
+
+                <div className="row">
+                    <div className="col-md-6">
+                        <input type="file" onChange={this.onFileChange} />
+                        <button onClick={this.onFileUpload}>
+                            Upload!
+                        </button>
+                    </div>
+                    <div className="col-md-6">
+                        <img src={this.state.b64content}>
+                        </img>
                     </div>
                 </div>
-                <div className="col col-center">
-                    <span>
-                        {dateFns.format(currentMonth, dateFormat)}
-                    </span>
-                </div>
-                <div className="col col-end" onClick={nextMonth}>
-                    <div className="icon">chevron_right</div>
-                </div>
+
             </div>
         );
-
     }
-    const renderDays = () => {
-        const dateFormat = "EEEE";
-        const days = [];
-        let startDate = dateFns.startOfWeek(currentMonth);
-        for (let i = 0; i < 7; i++) {
-            days.push(
-                <div className="col col-center" key={i}>
-                    {dateFns.format(dateFns.addDays(startDate, i), dateFormat)}
-                </div>
-            );
-        }
-        return <div className="days row">{days}</div>;
-    }
-    const renderCells = () => {
-        const monthStart = dateFns.startOfMonth(currentMonth);
-        const monthEnd = dateFns.endOfMonth(monthStart);
-        const startDate = dateFns.startOfWeek(monthStart);
-        const endDate = dateFns.endOfWeek(monthEnd);
-
-        const dateFormat = "d";
-        const rows = [];
-
-        let days = [];
-        let day = startDate;
-        let formattedDate = "";
-
-        while (day <= endDate) {
-            for (let i = 0; i < 7; i++) {
-                formattedDate = dateFns.format(day, dateFormat);
-                const cloneDay = day;
-                days.push(
-                    <div
-                        className={`col cell ${!dateFns.isSameMonth(day, monthStart)
-                            ? "disabled"
-                            : dateFns.isSameDay(day, selectedDate) ? "selected" : ""
-                            }`}
-                        key={day}
-                        onClick={() => { onDateClick(cloneDay) }}
-                    >
-                        <span className="number">{formattedDate}</span>
-                        <span className="bg">{formattedDate}</span>
-                    </div>
-                );
-                day = dateFns.addDays(day, 1);
-            }
-            rows.push(
-                <div className="row" key={day}>
-                    {days}
-                </div>
-            );
-            days = [];
-        }
-        return <div className="body">{rows}</div>;
-    }
-
-    const onDateClick = (day) => { setSelectedDate(day) }
-    const nextMonth = () => {
-        setCurrentMonth(dateFns.addMonths(currentMonth, 1));
-    }
-    const prevMonth = () => {
-        setCurrentMonth(dateFns.subMonths(currentMonth, 1));
-    }
-    return (
-        <div className="calendar">
-            {renderHeader()}
-            {renderDays()}
-            {renderCells()}
-        </div>
-    );
 }
 
-export default Calendar;
+export default MergeImage;
