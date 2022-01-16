@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: MIT
+//tuple(uint256,string)[]: 0,https://gateway.pinata.cloud/ipfs/QmUM2jvm9Ya795JoQMMc652tZgPiygPwfPrUpDmqbN4d6K
+
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -46,19 +48,28 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         platform = msg.sender;
         advisor = _advisor;
     }
+
+    /**
+     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
+     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
+     * by default, can be overriden in child contracts.
+     */
+    function _baseURI() internal view virtual  override returns (string memory) {
+        return baseURI;
+    }
     /*
         Mint 366 NFTs for the year 2022.
         @dev: Only the onwer can mint
     */
-    function mintDates(string[] memory tokenURI) public onlyOwner {
+    function mintDates(string[] memory tokenMetadata) public onlyOwner {
         require(mintActive, "The NFTs have already been minted");
-        require(tokenURI.length >= MAX_DATES, "Token URI missing");
+        require(tokenMetadata.length >= MAX_DATES, "Token URI missing");
         for(uint i = 0; i < MAX_DATES; i++) {
              uint mintIndex = i;
             _safeMint(msg.sender, mintIndex);
-            _setTokenURI(mintIndex, tokenURI[i]);
+            _setTokenURI(mintIndex, tokenMetadata[i]);
             
-            NFTData memory nft = NFTData(mintIndex, tokenURI[i]);
+            NFTData memory nft = NFTData(mintIndex, tokenURI(i));
             nftTokenMap[mintIndex] = nft;
             nftData.push(nft);
         }
@@ -92,22 +103,22 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     /*
         Buy an NFT which is on sale.
     */
-    function buyNft(uint tokenId) public payable {
-        require(_exists(tokenId), "Token ID does not exist");
+    function buyNft(uint tokenId, address _nftAddress) public payable {
         require(nftPrice[tokenId] > 0, "Token is not for sale");
         require(msg.value >= nftPrice[tokenId], "Price is lower than asking price");
 
+        ERC721 nftAddress = ERC721(_nftAddress);
 
-        address owner = ownerOf(tokenId);
+        address tokenOwner = nftAddress.ownerOf(tokenId);
 
-        safeTransferFrom(owner, msg.sender, tokenId);
+        nftAddress.safeTransferFrom(tokenOwner, msg.sender, tokenId);
 
         uint platformFee = (msg.value * 4)/100;
         uint advisorFee = (msg.value * 1)/100;
         uint sellerFee = (msg.value * 95) / 100;
         //Royalty payout - Total 5% (4 for platform, 1 for advisor)
         
-        payable(owner).transfer(sellerFee);
+        payable(tokenOwner).transfer(sellerFee);
         payable(platform).transfer(platformFee);
         payable(advisor).transfer(advisorFee);
 
@@ -134,5 +145,3 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     }
 
 }
-
-
