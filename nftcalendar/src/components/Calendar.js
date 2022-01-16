@@ -60,8 +60,14 @@ function Calendar(props) {
             })
         return transformed;
     }
-    const onBuy = (tokenid) => {
-        alert(tokenid)
+    const onBuy = async (tokenid) => {
+        try {
+            debugger;
+            const data = await ContractService.buyNFT(wallet, tokenid);
+            debugger
+        } catch (error) {
+            debugger;
+        }
     }
 
     const renderHeader = () => {

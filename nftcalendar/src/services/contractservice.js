@@ -17,6 +17,10 @@ export default class ContractService {
 
 
     };
+
+    static async buyNFT(walletaddress, tokenId) { 
+        
+    }
 }
 
 
