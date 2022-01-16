@@ -6,20 +6,35 @@ export default class ContractService {
 
     static async getAllNFT() {
         const web3service = WalletService.getWet3Object();
+        window.contract = await new web3service.eth.Contract(ABI, "0x1BB5b4752031c3A3e1149998A05D442e63F360F4");
+        return window.contract.methods.getNftData().call();
+
+    };
+
+    static async buyNFT(walletaddress, tokenId) {
+        const web3service = WalletService.getWet3Object();
 
         window.contract = await new web3service.eth.Contract(ABI, "0x1BB5b4752031c3A3e1149998A05D442e63F360F4");
 
         const transactionParameters = {
             to: "0x1BB5b4752031c3A3e1149998A05D442e63F360F4", // Required except during contract publications.
             from: window.ethereum.selectedAddress, // must match user's active address.
+            data: window.contract.methods
+                .buyNft(tokenId, "0x1BB5b4752031c3A3e1149998A05D442e63F360F4")
+                .encodeABI(),
         };
-        return window.contract.methods.getNftData().call();
 
+        try {
+            const txHash = await window.ethereum.request({
+                method: "eth_sendTransaction",
+                params: [transactionParameters],
+            });
+            debugger;
+        } catch (error) {
+            debugger;
+        }
+        // return window.contract.methods.getNftData().call();
 
-    };
-
-    static async buyNFT(walletaddress, tokenId) { 
-        
     }
 }
 
