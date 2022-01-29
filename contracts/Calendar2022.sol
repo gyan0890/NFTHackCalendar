@@ -5,14 +5,16 @@ pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract Calendar2022 is  ERC721URIStorage, Ownable{
     
     string baseURI;
 
-    //Set it to 366 for 2022
-    uint constant MAX_DATES = 28;
     bool public mintActive = false;
+    using Counters for Counters.Counter;
+
+    Counters.Counter private tokenCount;
 
     address platform;
     address advisor;
@@ -64,22 +66,21 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         Mint 366 NFTs for the year 2022.
         @dev: Only the onwer can mint
     */
-    function mintDates(string[] memory tokenMetadata, uint floorPrice) public onlyOwner {
-        require(mintActive, "The NFTs have already been minted");
-        require(tokenMetadata.length >= MAX_DATES, "Token URI missing");
-        for(uint i = 0; i < MAX_DATES; i++) {
-             uint mintIndex = i;
-            _safeMint(msg.sender, mintIndex);
-            _setTokenURI(mintIndex, tokenMetadata[i]);
-            
-            NFTData memory nft = NFTData(mintIndex, tokenURI(i), floorPrice, msg.sender, false);
-            nftTokenMap[mintIndex] = nft;
-            nftPrice[mintIndex] = floorPrice;
-            nftData.push(nft);
-        }
+    function mintDate(uint256 tokenId, string memory tokenMetadata, uint floorPrice) public payable {
+        tokenCount.increment();
+        require(mintActive, "The minting phase is not active");
+        require(msg.value >= floorPrice, "The sent value is less than floor price");
+        
 
-        mintActive = false;
-        emit Minted(msg.sender, MAX_DATES);
+        _safeMint(msg.sender, tokenId);
+        _setTokenURI(tokenId, tokenMetadata);
+            
+        NFTData memory nft = NFTData(tokenId, tokenURI(tokenId), floorPrice, msg.sender, false);
+        nftTokenMap[tokenId] = nft;
+        nftPrice[tokenId] = floorPrice;
+        nftData.push(nft);
+
+        emit Minted(msg.sender, tokenId);
         
     }
 
@@ -97,10 +98,14 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         Update the token metadata by settng the new token URI.
     */
     function updateTokenURI(uint tokenId, string memory updatedTokenURI, bool isLocked) public onlyTokenOwner(tokenId){
-        NFTData storage nftUpdated = nftTokenMap[tokenId];
+        NFTData memory nftUpdated = nftTokenMap[tokenId];
         _setTokenURI(tokenId, updatedTokenURI);
-        nftUpdated.tokenURI = updatedTokenURI;
+
+        nftUpdated.tokenURI = tokenURI(tokenId);
         nftUpdated.locked = isLocked;
+
+        nftTokenMap[tokenId] = nftUpdated;
+
         emit TokenMetadatUpdated(tokenId, updatedTokenURI);
     }
 
@@ -117,11 +122,6 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
 
         nftAddress.safeTransferFrom(tokenOwner, msg.sender, tokenId);
 
-        //Change the price back to 0
-        NFTData storage nftUpdated = nftTokenMap[tokenId];
-        nftUpdated.price = 0;
-        nftUpdated.tokenOwner = msg.sender;
-
         uint platformFee = (msg.value * 4)/100;
         uint advisorFee = (msg.value * 1)/100;
         uint sellerFee = (msg.value * 95) / 100;
@@ -130,6 +130,12 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
         payable(tokenOwner).transfer(sellerFee);
         payable(platform).transfer(platformFee);
         payable(advisor).transfer(advisorFee);
+
+        NFTData memory nftUpdated = nftTokenMap[tokenId];
+        nftUpdated.price = 0;
+        nftUpdated.tokenOwner = msg.sender;
+
+        nftTokenMap[tokenId] = nftUpdated;
 
         emit Sold(tokenId, msg.value);
 
@@ -141,6 +147,32 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     function unLock(uint tokenId) public onlyTokenOwner(tokenId){
         NFTData storage nftUpdated = nftTokenMap[tokenId];
         nftUpdated.locked = false;
+    }
+
+    /*
+        Withdraw funds present in the contract to the owner.
+    */
+    function withdrawFunds(address to) public onlyOwner {
+        require(address(this).balance > 0, "The contract does not have any balance");
+        payable(to).transfer(address(this).balance);
+    }
+
+    ///Set the mint status of the contract
+    function setMintStatus(bool status) public onlyOwner {
+        mintActive = status;
+    }
+
+    /* Get the mint status of the contract
+    */
+    function getMintStatus() external view returns(bool) {
+        return mintActive;
+    }
+
+    /* 
+        Get token count
+    */
+    function getTokenCount() external view onlyOwner returns(uint) {
+        return tokenCount.current();
     }
 
     /**
@@ -158,7 +190,13 @@ contract Calendar2022 is  ERC721URIStorage, Ownable{
     */
     function getNftData() public view returns(NFTData[] memory)
     {
-        return nftData;
+        NFTData[] memory latestNftData = new NFTData[](tokenCount.current());
+        for(uint i = 0; i < nftData.length; i++){
+            NFTData storage data = nftTokenMap[nftData[i].tokenId];
+            latestNftData[i] = data;
+        }
+
+        return latestNftData;
     }
 
 }
